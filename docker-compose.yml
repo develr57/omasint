@@ -1,0 +1,88 @@
+services:
+  postgres:
+    image: postgres:17.2-alpine3.20
+    environment:
+      POSTGRES_USER: $DB_USER
+      POSTGRES_PASSWORD: $DB_PASS
+      POSTGRES_DB: $DB_NAME
+    ports:
+      - $DB_PORT:$DB_PORT
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - omasint-network
+
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "9000:8080"
+    depends_on:
+      - postgres
+    networks:
+      - omasint-network
+
+
+  backend:
+    build:
+      context: ./docker/backend
+      args:
+        HOST_UID: $HOST_UID
+#    ports:
+#      - "8000:8000"
+    expose:
+      - 8000
+    command: sh -c "gunicorn --bind 0.0.0.0:8000 backend.wsgi:application --log-level=info \
+                    && python3 manage.py collectstatic --no-input"
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - postgres
+    networks:
+      - omasint-network
+
+
+  frontend:
+    build:
+      context: ./docker/frontend
+      args:
+        HOST_UID: $HOST_UID
+    command: sh -c "yarn dev"
+    working_dir: /var/www/frontend
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./frontend:/var/www/frontend
+    depends_on:
+      - backend
+    networks:
+      - omasint-network
+
+
+  nginx:
+    build:
+      context: ./docker/nginx
+      args:
+        HOST_UID: $HOST_UID
+    ports:
+      - "80:80"
+      - "8001:8001"
+    volumes:
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./backend/static:/static
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - omasint-network
+
+
+volumes:
+  pg_data:
+
+
+networks:
+  omasint-network:
+    driver: bridge
