@@ -11,11 +11,6 @@ export default {
     return {
       open_error_modal: false,
       error_modal_text: null,
-      mainActive: false,
-      animaltypesActive: false,
-      breedsActive: false,
-      animalsActive: false,
-      weightingsActive: false
     }
   },
   computed: {
@@ -29,7 +24,12 @@ export default {
     ]),
     ...mapState(useRoutingStore, [
         'curr_route_name',
-        'getCurrRouteName'
+        'getCurrRouteName',
+        'mainActive',
+        'animaltypesActive',
+        'breedsActive',
+        'animalsActive',
+        'weightingsActive'
     ])
   },
   methods: {
@@ -38,7 +38,8 @@ export default {
         'storeLoggedInUser'
     ]),
     ...mapActions(useRoutingStore, [
-        'setCurrRouteName'
+        'setCurrRouteName',
+        'setMenuItemActive'
     ]),
     logout() {
       axios.post(`${this.API_URL}/auth/token/logout`, {}, {
@@ -74,27 +75,8 @@ export default {
         this.$router.push('/login');
       }
     },
-    curr_route_name: function () {
-      this.mainActive = false;
-      this.animaltypesActive = false;
-      this.breedsActive = false;
-      this.animalsActive = false;
-      this.weightingsActive = false;
-      if (this.curr_route_name === 'Main') {
-        this.mainActive = true;
-      }
-      if (this.curr_route_name === 'Animaltypes') {
-        this.animaltypesActive = true;
-      }
-      if (this.curr_route_name === 'Breeds') {
-        this.breedsActive = true;
-      }
-      if (this.curr_route_name === 'Animals') {
-        this.animalsActive = true;
-      }
-      if (this.curr_route_name === 'Weightings') {
-        this.weightingsActive = true;
-      }
+    "$route.name": function() {
+      this.setMenuItemActive(this.$route.name);
     }
   }
 }

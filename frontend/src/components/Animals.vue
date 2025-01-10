@@ -6,7 +6,6 @@ import { useApiStore } from '../store/api';
 import Modal from "./Modal.vue";
 import { useAnimalsStore } from "../store/animals.js";
 import moment from 'moment';
-import {useRoutingStore} from "../store/routing.js";
 
 
 export default {
@@ -16,6 +15,7 @@ export default {
   },
   data() {
     return {
+      page_title: 'Животные',
       animals: [],
       pagin_list: [],
       start: null,
@@ -50,9 +50,6 @@ export default {
       'setCurrPage',
       'setOffset',
       'setTotalPages'
-    ]),
-    ...mapActions(useRoutingStore, [
-        'setCurrRouteName'
     ]),
     async getAnimals() {
       const data = await axios.get(`${this.API_URL}/api/v1/animals/`, {
@@ -151,8 +148,7 @@ export default {
     this.setCurrPage(this.$route.params.page);
     this.setOffset((this.getCurrPage - 1) * this.getPageSize);
     this.getAnimals();
-    this.setCurrRouteName(this.$route.name);
-    document.title = 'Животные';
+    document.title = this.page_title;
   },
   watch: {
     '$route.params.page': function () {
@@ -198,7 +194,7 @@ export default {
             <td>{{ returnDateAndTime(animal.created_at) }}</td>
             <td>{{ returnDateAndTime(animal.updated_at) }}</td>
             <td><RouterLink :to="`/weightings/add/${animal.id}`" class="btn btn-primary">Взвесить</RouterLink></td>
-            <td><a @click="confirmationDelete(animal.id, animal.name)" href="#" class="btn">❌</a></td>
+            <td><a @click="confirmationDelete(animal.id, animal.name)" href="#" class="btn btn-danger btn_delete">x</a></td>
           </tr>
         </tbody>
         <tfoot></tfoot>
@@ -210,7 +206,7 @@ export default {
     </div>
     <div class="mt-2">
       <RouterLink v-for="n in pagin_list" class="btn btn-primary mx-1" :class="{ activePagBtn: pagBtnIsActive(n) }"
-        :to="`/animals/page/${n}`">{{ n }}</RouterLink>
+        :to="`/animals/page/${n}`" :key="n">{{ n }}</RouterLink>
     </div>
 
 <!--    <button id="show-modal" @click="showModal = true">Показать модальное окно</button>-->
@@ -249,17 +245,5 @@ export default {
 </template>
 
 <style scoped>
-  .activePagBtn {
-    background-color: orange !important;
-  }
-  .modal-header h3 {
-    margin-top: 0;
-    color: #42b983;
-  }
-  .btn_yes {
-    float: left;
-  }
-  .btn_no {
-    float: right;
-  }
+
 </style>

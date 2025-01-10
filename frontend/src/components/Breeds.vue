@@ -6,7 +6,6 @@ import { useApiStore } from '../store/api';
 import Modal from "./Modal.vue";
 import { useBreedsStore } from "../store/breeds.js";
 import moment from 'moment';
-import {useRoutingStore} from "../store/routing.js";
 
 
 export default {
@@ -16,6 +15,7 @@ export default {
   },
   data() {
     return {
+      page_title: 'Породы животных',
       breeds: [],
       pagin_list: [],
       per_page: 10,
@@ -51,9 +51,6 @@ export default {
       'setCurrPage',
       'setOffset',
       'setTotalPages'
-    ]),
-    ...mapActions(useRoutingStore, [
-        'setCurrRouteName'
     ]),
     async getBreeds() {
       const data = await axios.get(`${this.API_URL}/api/v1/breeds/`, {
@@ -143,8 +140,7 @@ export default {
     this.setCurrPage(this.$route.params.page);
     this.setOffset((this.getCurrPage - 1) * this.getPageSize);
     this.getBreeds();
-    this.setCurrRouteName(this.$route.name);
-    document.title = 'Породы животных';
+    document.title = this.page_title;
   },
   watch: {
     '$route.params.page': function () {
@@ -178,7 +174,7 @@ export default {
             <td>{{ breed.animaltype_name }}</td>
             <td>{{ returnDateAndTime(breed.created_at) }}</td>
             <td>{{ returnDateAndTime(breed.updated_at) }}</td>
-            <td><a @click="confirmationDelete(breed.id, breed.name)" href="#" class="btn">❌</a></td>
+            <td><a @click="confirmationDelete(breed.id, breed.name)" href="#" class="btn btn-danger btn_delete">x</a></td>
           </tr>
         </tbody>
         <tfoot></tfoot>
@@ -190,7 +186,7 @@ export default {
     </div>
     <div class="mt-2">
       <RouterLink v-for="n in pagin_list" class="btn btn-primary mx-1" :class="{ activePagBtn: pagBtnIsActive(n) }"
-        :to="`/breeds/page/${n}`">{{ n }}</RouterLink>
+        :to="`/breeds/page/${n}`" :key="n">{{ n }}</RouterLink>
     </div>
 
 <!--    <button id="show-modal" @click="showModal = true">Показать модальное окно</button>-->
@@ -228,17 +224,5 @@ export default {
 </template>
 
 <style scoped>
-  .activePagBtn {
-    background-color: orange !important;
-  }
-  .modal-header h3 {
-    margin-top: 0;
-    color: #42b983;
-  }
-  .btn_yes {
-    float: left;
-  }
-  .btn_no {
-    float: right;
-  }
+
 </style>

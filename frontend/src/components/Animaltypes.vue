@@ -4,7 +4,6 @@ import axios from 'axios';
 import { useUserStore } from '../store/user';
 import { useApiStore } from '../store/api';
 import { useAnimaltypesStore } from "../store/animaltypes.js";
-import { useRoutingStore } from "../store/routing.js";
 import Modal from "./Modal.vue";
 import moment from 'moment';
 
@@ -17,6 +16,7 @@ export default {
   },
   data() {
     return {
+      page_title: 'Типы животных',
       animaltypes: [],
       pagin_list: [],
       per_page: 10,
@@ -44,9 +44,6 @@ export default {
         'getOffset',
         'getTotalPages',
     ]),
-    ...mapState(useRoutingStore, [
-        'curr_route_name',
-    ])
   },
   methods: {
     ...mapActions(useAnimaltypesStore, [
@@ -55,9 +52,6 @@ export default {
         'setCurrPage',
         'setOffset',
         'setTotalPages'
-    ]),
-    ...mapActions(useRoutingStore, [
-        'setCurrRouteName'
     ]),
     async getAnimalTypes() {
       const data = await axios.get(`${this.API_URL}/api/v1/animaltypes/`, {
@@ -147,8 +141,7 @@ export default {
     this.setCurrPage(this.$route.params.page);
     this.setOffset((this.getCurrPage - 1) * this.getPageSize);
     this.getAnimalTypes();
-    this.setCurrRouteName(this.$route.name);
-    document.title = 'Типы животных';
+    document.title = this.page_title;
   },
   watch: {
     '$route.params.page': function () {
@@ -181,7 +174,8 @@ export default {
             <td><RouterLink :to="`/animaltypes/edit/${animaltype.id}`">{{ animaltype.name }}</RouterLink></td>
             <td>{{ returnDateAndTime(animaltype.created_at) }}</td>
             <td>{{ returnDateAndTime(animaltype.updated_at) }}</td>
-            <td><a @click="confirmationDelete(animaltype.id, animaltype.name)" href="#" class="btn">❌</a></td>
+            <td><a @click="confirmationDelete(animaltype.id, animaltype.name)" href="#"
+              class="btn btn-danger btn_delete">x</a></td>
           </tr>
         </tbody>
         <tfoot></tfoot>
@@ -192,10 +186,9 @@ export default {
     </div>
     <div class="mt-2">
       <RouterLink v-for="n in pagin_list" class="btn btn-primary mx-1" :class="{ activePagBtn: pagBtnIsActive(n) }"
-        :to="`/animaltypes/page/${n}`">{{ n }}</RouterLink>
+        :to="`/animaltypes/page/${n}`" :key="n">{{ n }}</RouterLink>
     </div>
 
-<!--    <button id="show-modal" @click="showModal = true">Показать модальное окно</button>-->
     <Teleport to="body">
       <modal :show="showModal" @close="showModal = false">
         <template #header>
@@ -231,17 +224,5 @@ export default {
 
 
 <style scoped>
-  .activePagBtn {
-    background-color: orange !important;
-  }
-  .modal-header h3 {
-    margin-top: 0;
-    color: #42b983;
-  }
-  .btn_yes {
-    float: left;
-  }
-  .btn_no {
-    float: right;
-  }
+
 </style>

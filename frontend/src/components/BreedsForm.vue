@@ -166,7 +166,7 @@ export default {
             <input v-model="breed.animaltype" type="number" id="inputAnimaltype" class="form-control" hidden>
             <div class="searched-box" v-if="animaltypes !== null">
               <ul><li>Выберите нужный вариант</li>
-                <li v-for="animaltype in animaltypes"><a href="#"
+                <li v-for="animaltype in animaltypes" :key="animaltype.id"><a href="#"
                    @click="setAnimalType(animaltype.id, animaltype.name)">{{ animaltype.name }}</a></li>
               </ul>
             </div>
@@ -190,18 +190,5 @@ export default {
 
 
 <style scoped>
-.searched-box {
-  background-color: white;
-  border: 1.5px solid #d9d9d9 !important;
-  border-radius: 0.5em;
-  margin-top: 0.1em;
-  position: absolute;
-  width: 20em;
-}
-.searched-box li {
-  list-style: none;
-}
-.searched-box ul {
-  padding-left: 0.5em;
-}
+
 </style>

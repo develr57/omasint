@@ -6,7 +6,6 @@ import { useApiStore } from '../store/api';
 import Modal from "./Modal.vue";
 import { useWeightingsStore } from "../store/weightings.js";
 import moment from 'moment';
-import {useRoutingStore} from "../store/routing.js";
 
 
 export default {
@@ -16,6 +15,7 @@ export default {
   },
   data() {
     return {
+      page_title: 'Взвешивания',
       weightings: [],
       pagin_list: [],
       start: null,
@@ -49,9 +49,6 @@ export default {
       'setCurrPage',
       'setOffset',
       'setTotalPages'
-    ]),
-    ...mapActions(useRoutingStore, [
-        'setCurrRouteName'
     ]),
     async getWeightings() {
       const data = await axios.get(`${this.API_URL}/api/v1/weightings/`, {
@@ -146,8 +143,7 @@ export default {
     this.setCurrPage(this.$route.params.page);
     this.setOffset((this.getCurrPage - 1) * this.getPageSize);
     this.getWeightings();
-    this.setCurrRouteName(this.$route.name);
-    document.title = 'Взвешивания';
+    document.title = this.page_title;
   },
   watch: {
     '$route.params.page': function () {
@@ -185,7 +181,7 @@ export default {
             <td v-if="user.is_superuser">{{ weighting.username }}</td>
             <td>{{ returnDateAndTime(weighting.created_at) }}</td>
             <td>{{ returnDateAndTime(weighting.updated_at) }}</td>
-            <td><a @click="confirmationDelete(weighting.id)" href="#" class="btn">❌</a></td>
+            <td><a @click="confirmationDelete(weighting.id)" href="#" class="btn btn-danger btn_delete">x</a></td>
           </tr>
         </tbody>
         <tfoot></tfoot>
@@ -197,7 +193,7 @@ export default {
 <!--    </div>-->
     <div class="mt-2">
       <RouterLink v-for="n in pagin_list" class="btn btn-primary mx-1" :class="{ activePagBtn: pagBtnIsActive(n) }"
-        :to="`/weightings/page/${n}`">{{ n }}</RouterLink>
+        :to="`/weightings/page/${n}`" :key="n">{{ n }}</RouterLink>
     </div>
 
 <!--    <button id="show-modal" @click="showModal = true">Показать модальное окно</button>-->
@@ -221,17 +217,5 @@ export default {
 </template>
 
 <style scoped>
-  .activePagBtn {
-    background-color: orange !important;
-  }
-  .modal-header h3 {
-    margin-top: 0;
-    color: #42b983;
-  }
-  .btn_yes {
-    float: left;
-  }
-  .btn_no {
-    float: right;
-  }
+
 </style>
